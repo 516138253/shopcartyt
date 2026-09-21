@@ -1,3 +1,5 @@
+"use client";
+
 import { Product } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
@@ -9,11 +11,19 @@ import PriceView from "./PriceView";
 import Title from "./Title";
 import ProductSideMenu from "./ProductSideMenu";
 import AddToCartButton from "./AddToCartButton";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLocalizedCms } from "@/hooks/useLocalizedCms";
+
+type ProductCategory = string | { title?: string; slug?: string };
 
 const ProductCard = ({ product }: { product: Product }) => {
+  const { t } = useTranslation();
+  const cms = useLocalizedCms();
+  const categories = product.categories as ProductCategory[] | undefined;
+
   return (
-    <div className="text-sm border-[1px] rounded-md border-darkBlue/20 group bg-white">
-      <div className="relative group overflow-hidden bg-shop_light_bg">
+    <div className="text-sm brand-card group overflow-hidden">
+      <div className="relative group overflow-hidden bg-slate-50 rounded-t-2xl">
         {product?.images && (
           <Link href={`/product/${product?.slug?.current}`}>
             <Image
@@ -22,57 +32,69 @@ const ProductCard = ({ product }: { product: Product }) => {
               width={500}
               height={500}
               priority
-              className={`w-full h-64 object-contain overflow-hidden transition-transform bg-shop_light_bg duration-500 
+              className={`w-full h-64 object-contain overflow-hidden transition-transform bg-slate-50 duration-500 
               ${product?.stock !== 0 ? "group-hover:scale-105" : "opacity-50"}`}
             />
           </Link>
         )}
         <ProductSideMenu product={product} />
         {product?.status === "sale" ? (
-          <p className="absolute top-2 left-2 z-10 text-xs border border-darkColor/50 px-2 rounded-full group-hover:border-lightGreen hover:text-shop_dark_green hoverEffect">
-            Sale!
+          <p className="absolute top-2 left-2 z-10 text-xs bg-orange-500 text-white px-3 py-0.5 rounded-full shadow-sm">
+            {t.common.sale}
           </p>
         ) : (
           <Link
             href={"/deal"}
-            className="absolute top-2 left-2 z-10 border border-shop_orange/50 p-1 rounded-full group-hover:border-shop_orange hover:text-shop_dark_green hoverEffect"
+            className="absolute top-2 left-2 z-10 bg-white/90 p-1.5 rounded-full shadow-sm hover:scale-110 hoverEffect"
           >
             <Flame
               size={18}
               fill="#fb6c08"
-              className="text-shop_orange/50 group-hover:text-shop_orange hoverEffect"
+              className="text-orange-400 group-hover:text-orange-500 hoverEffect"
             />
           </Link>
         )}
       </div>
       <div className="p-3 flex flex-col gap-2">
-        {product?.categories && (
-          <p className="uppercase line-clamp-1 text-xs font-medium text-lightText">
-            {product.categories.map((cat) => cat).join(", ")}
+        {categories && (
+          <p className="uppercase line-clamp-1 text-xs font-medium text-slate-400">
+            {categories
+              .map((cat) =>
+                typeof cat === "string"
+                  ? cat
+                  : cms.categoryLabel(cat.slug ?? cat.title)
+              )
+              .join(", ")}
           </p>
         )}
-        <Title className="text-sm line-clamp-1">{product?.name}</Title>
+        <Title className="text-sm line-clamp-1">
+          {cms.productName(product._id, product.name)}
+        </Title>
         <div className="flex items-center gap-2">
           <div className="flex items-center">
             {[...Array(5)].map((_, index) => (
               <StarIcon
                 key={index}
                 className={
-                  index < 4 ? "text-shop_light_green" : " text-lightText"
+                  index < 4 ? "text-brand-blue" : " text-slate-300"
                 }
-                fill={index < 4 ? "#93D991" : "#ababab"}
+                fill={index < 4 ? "#2563eb" : "#cbd5e1"}
               />
             ))}
           </div>
-          <p className="text-lightText text-xs tracking-wide">5 Reviews</p>
+          <p className="text-slate-400 text-xs tracking-wide">
+            5 {t.common.reviews}
+          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <p className="font-medium">In Stock</p>
+          <p className="font-medium">{t.common.inStock}</p>
           <p
-            className={`${product?.stock === 0 ? "text-red-600" : "text-shop_dark_green/80 font-semibold"}`}
+            className={`${product?.stock === 0 ? "text-red-600" : "text-brand-blue font-semibold"}`}
           >
-            {(product?.stock as number) > 0 ? product?.stock : "unavailable"}
+            {(product?.stock as number) > 0
+              ? product?.stock
+              : t.common.unavailable}
           </p>
         </div>
 
@@ -81,7 +103,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           discount={product?.discount}
           className="text-sm"
         />
-        <AddToCartButton product={product} className="w-36 rounded-full" />
+        <AddToCartButton product={product} className="w-full" />
       </div>
     </div>
   );

@@ -83,10 +83,11 @@ export const productType = defineType({
       type: "string",
       options: {
         list: [
-          { title: "Gadget", value: "gadget" },
-          { title: "Appliances", value: "appliances" },
-          { title: "Refrigerators", value: "refrigerators" },
-          { title: "Others", value: "others" },
+          { title: "Tea 茶叶", value: "tea" },
+          { title: "Chenpi 陈皮", value: "chenpi" },
+          { title: "Juhong 橘红", value: "juhong" },
+          { title: "Xinhui Gan 新会柑", value: "xinhuiGan" },
+          { title: "Specialty 特产礼盒", value: "specialty" },
         ],
       },
     }),

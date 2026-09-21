@@ -6,14 +6,17 @@ const LATEST_BLOG_QUERY = defineQuery(
   ` *[_type == 'blog' && isLatest == true]|order(name asc){
       ...,
       blogcategories[]->{
-      title
+      _id,
+      title,
+      "slug": slug.current
     }
     }`
 );
 
 const DEAL_PRODUCTS = defineQuery(
   `*[_type == 'product' && status == 'hot'] | order(name asc){
-    ...,"categories": categories[]->title
+    ...,
+    "categories": categories[]->{title, "slug": slug.current}
   }`
 );
 
@@ -33,9 +36,11 @@ const MY_ORDERS_QUERY =
 }`);
 const GET_ALL_BLOG = defineQuery(
   `*[_type == 'blog'] | order(publishedAt desc)[0...$quantity]{
-  ...,  
+  ...,
      blogcategories[]->{
-    title
+    _id,
+    title,
+    "slug": slug.current
 }
     }
   `
@@ -45,10 +50,12 @@ const SINGLE_BLOG_QUERY =
   defineQuery(`*[_type == "blog" && slug.current == $slug][0]{
   ..., 
     author->{
+    _id,
     name,
     image,
   },
   blogcategories[]->{
+    _id,
     title,
     "slug": slug.current,
   },

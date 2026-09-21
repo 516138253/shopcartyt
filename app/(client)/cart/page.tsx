@@ -32,6 +32,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useLocalizedCms } from "@/hooks/useLocalizedCms";
 
 const CartPage = () => {
   const {
@@ -47,6 +48,7 @@ const CartPage = () => {
   const { user } = useUser();
   const [addresses, setAddresses] = useState<Address[] | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const cms = useLocalizedCms();
 
   const fetchAddresses = async () => {
     setLoading(true);
@@ -139,7 +141,7 @@ const CartPage = () => {
                             <div className="h-full flex flex-1 flex-col justify-between py-1">
                               <div className="flex flex-col gap-0.5 md:gap-1.5">
                                 <h2 className="text-base font-semibold line-clamp-1">
-                                  {product?.name}
+                                  {cms.productName(product?._id, product?.name)}
                                 </h2>
                                 <p className="text-sm capitalize">
                                   Variant:{" "}

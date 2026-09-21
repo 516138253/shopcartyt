@@ -1,27 +1,25 @@
 "use client";
 import { BRANDS_QUERYResult, Category, Product } from "@/sanity.types";
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Container from "./Container";
 import Title from "./Title";
 import CategoryList from "./shop/CategoryList";
 import { useSearchParams } from "next/navigation";
 import BrandList from "./shop/BrandList";
 import PriceList from "./shop/PriceList";
-import { client } from "@/sanity/lib/client";
-import { Loader2 } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
 
 interface Props {
   categories: Category[];
   brands: BRANDS_QUERYResult;
+  products: Product[];
 }
-const Shop = ({ categories, brands }: Props) => {
+
+const Shop = ({ categories, brands, products: allProducts }: Props) => {
   const searchParams = useSearchParams();
   const brandParams = searchParams?.get("brand");
   const categoryParams = searchParams?.get("category");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categoryParams || null
   );
@@ -29,42 +27,49 @@ const Shop = ({ categories, brands }: Props) => {
     brandParams || null
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      let minPrice = 0;
-      let maxPrice = 10000;
-      if (selectedPrice) {
-        const [min, max] = selectedPrice.split("-").map(Number);
-        minPrice = min;
-        maxPrice = max;
-      }
-      const query = `
-      *[_type == 'product' 
-        && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
-        && (!defined($selectedBrand) || references(*[_type == "brand" && slug.current == $selectedBrand]._id))
-        && price >= $minPrice && price <= $maxPrice
-      ] 
-      | order(name asc) {
-        ...,"categories": categories[]->title
-      }
-    `;
-      const data = await client.fetch(
-        query,
-        { selectedCategory, selectedBrand, minPrice, maxPrice },
-        { next: { revalidate: 0 } }
-      );
-      setProducts(data);
-    } catch (error) {
-      console.log("Shop product fetching Error", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory, selectedBrand, selectedPrice]);
+  const products = useMemo(() => {
+    let minPrice = 0;
+    let maxPrice = 10000;
+
+    if (selectedPrice) {
+      const [min, max] = selectedPrice.split("-").map(Number);
+      minPrice = min;
+      maxPrice = max;
+    }
+
+    return allProducts.filter((product) => {
+      const price = product.price ?? 0;
+      const matchesPrice = price >= minPrice && price <= maxPrice;
+
+      const matchesCategory =
+        !selectedCategory ||
+        product.categories?.some((category) => {
+          if (typeof category === "string") {
+            const categoryDoc = categories.find(
+              (item) => item.slug?.current === selectedCategory
+            );
+            return categoryDoc?.title === category;
+          }
+          return category.slug === selectedCategory;
+        });
+
+      const matchesBrand =
+        !selectedBrand ||
+        product.brand?._ref ===
+          brands.find((item) => item.slug?.current === selectedBrand)?._id;
+
+      return matchesPrice && matchesCategory && matchesBrand;
+    });
+  }, [
+    allProducts,
+    brands,
+    categories,
+    selectedBrand,
+    selectedCategory,
+    selectedPrice,
+  ]);
+
   return (
     <div className="border-t">
       <Container className="mt-5">
@@ -108,16 +113,9 @@ const Shop = ({ categories, brands }: Props) => {
           </div>
           <div className="flex-1 pt-5">
             <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2 scrollbar-hide">
-              {loading ? (
-                <div className="p-20 flex flex-col gap-2 items-center justify-center bg-white">
-                  <Loader2 className="w-10 h-10 text-shop_dark_green animate-spin" />
-                  <p className="font-semibold tracking-wide text-base">
-                    Product is loading . . .
-                  </p>
-                </div>
-              ) : products?.length > 0 ? (
+              {products?.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-                  {products?.map((product) => (
+                  {products.map((product) => (
                     <ProductCard key={product?._id} product={product} />
                   ))}
                 </div>

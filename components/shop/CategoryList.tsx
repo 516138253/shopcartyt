@@ -1,4 +1,7 @@
+"use client";
+
 import { Category } from "@/sanity.types";
+import { useLocalizedCms } from "@/hooks/useLocalizedCms";
 import React from "react";
 import Title from "../Title";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
@@ -15,6 +18,8 @@ const CategoryList = ({
   selectedCategory,
   setSelectedCategory,
 }: Props) => {
+  const cms = useLocalizedCms();
+
   return (
     <div className="w-full bg-white p-5">
       <Title className="text-base font-black">Product Categories</Title>
@@ -36,7 +41,7 @@ const CategoryList = ({
               htmlFor={category?.slug?.current}
               className={`${selectedCategory === category?.slug?.current ? "font-semibold text-shop_dark_green" : "font-normal"}`}
             >
-              {category?.title}
+              {cms.categoryLabel(category?.slug?.current) || category?.title}
             </Label>
           </div>
         ))}

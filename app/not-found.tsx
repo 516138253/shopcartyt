@@ -21,9 +21,9 @@ const NotFoundPage = () => {
           <div className="rounded-md shadow-sm space-y-4">
             <Link
               href="/"
-              className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-semibold rounded-md text-white bg-shop_dark_green/80 hover:bg-shop_dark_green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amazonOrangeDark hoverEffect"
+              className="w-full flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full text-white brand-gradient hoverEffect"
             >
-              Go to Shopcart&apos;s home page
+              Back to GZ Direct Home
             </Link>
             <Link
               href="/help"

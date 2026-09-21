@@ -1,4 +1,7 @@
+"use client";
+
 import { BRANDS_QUERYResult } from "@/sanity.types";
+import { useLocalizedCms } from "@/hooks/useLocalizedCms";
 import React from "react";
 import Title from "../Title";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
@@ -11,6 +14,8 @@ interface Props {
 }
 
 const BrandList = ({ brands, selectedBrand, setSelectedBrand }: Props) => {
+  const cms = useLocalizedCms();
+
   return (
     <div className="w-full bg-white p-5">
       <Title className="text-base font-black">Brands</Title>
@@ -30,7 +35,7 @@ const BrandList = ({ brands, selectedBrand, setSelectedBrand }: Props) => {
               htmlFor={brand?.slug?.current}
               className={`${selectedBrand === brand?.slug?.current ? "font-semibold text-shop_dark_green" : "font-normal"}`}
             >
-              {brand?.title}
+              {cms.brandLabel(brand?.slug?.current, brand?.title)}
             </Label>
           </div>
         ))}

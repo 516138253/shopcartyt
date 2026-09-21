@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typegen": "npx sanity@latest schema extract && npx sanity@latest typegen generate"
+    "typegen": "npx sanity@latest schema extract && npx sanity@latest typegen generate",
+    "seed:import": "sanity dataset import sanity/seed/tea-culture.ndjson production --replace",
+    "seed:images": "sanity exec sanity/seed/upload-images.mjs --with-user-token",
+    "seed:all": "npm run seed:import && npm run seed:images",
+    "seed:english": "sanity exec sanity/seed/patch-english.mjs --with-user-token"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.12.6",

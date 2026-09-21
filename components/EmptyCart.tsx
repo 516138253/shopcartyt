@@ -4,8 +4,11 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { emptyCart } from "@/images";
 import Image from "next/image";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function EmptyCart() {
+  const { t } = useTranslation();
+
   return (
     <div className="py-10 md:py-20 bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
       <motion.div
@@ -50,21 +53,18 @@ export default function EmptyCart() {
         </motion.div>
 
         <div className="text-center space-y-4">
-          <h2 className="text-3xl font-bold text-gray-800">
-            Your cart is feeling lonely
+          <h2 className="text-3xl font-bold text-brand-navy">
+            {t.cart.emptyTitle}
           </h2>
-          <p className="text-gray-600">
-            It looks like you haven&apos;t added anything to your cart yet.
-            Let&apos;s change that and find some amazing products for you!
-          </p>
+          <p className="text-slate-600">{t.cart.emptyDesc}</p>
         </div>
 
         <div>
           <Link
             href="/"
-            className="block bg-darkColor/5 border border-darkColor/20 text-center py-2.5 rounded-full text-sm font-semibold tracking-wide hover:border-darkColor hover:bg-darkColor hover:text-white hoverEffect"
+            className="block brand-gradient text-center py-2.5 rounded-full text-sm font-semibold tracking-wide text-white hoverEffect"
           >
-            Discover Products
+            {t.cart.discover}
           </Link>
         </div>
       </motion.div>

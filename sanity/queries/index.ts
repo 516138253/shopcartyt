@@ -15,11 +15,11 @@ import {
 const getCategories = async (quantity?: number) => {
   try {
     const query = quantity
-      ? `*[_type == 'category'] | order(name asc) [0...$quantity] {
+      ? `*[_type == 'category' && !(_id in path("drafts.**"))] | order(title asc) [0...$quantity] {
           ...,
           "productCount": count(*[_type == "product" && references(^._id)])
         }`
-      : `*[_type == 'category'] | order(name asc) {
+      : `*[_type == 'category' && !(_id in path("drafts.**"))] | order(title asc) {
           ...,
           "productCount": count(*[_type == "product" && references(^._id)])
         }`;
@@ -53,6 +53,51 @@ const getLatestBlogs = async () => {
     return [];
   }
 };
+const getProductsByVariant = async (variant: string) => {
+  try {
+    const query = `*[_type == "product" && variant == $variant] | order(name asc){
+      ...,
+      "categories": categories[]->{title, "slug": slug.current}
+    }`;
+    const { data } = await sanityFetch({ query, params: { variant } });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching products by variant:", error);
+    return [];
+  }
+};
+
+const getAllProducts = async () => {
+  try {
+    const query = `*[_type == "product"] | order(name asc){
+      ...,
+      "categories": categories[]->{title, "slug": slug.current}
+    }`;
+    const { data } = await sanityFetch({ query });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching all products:", error);
+    return [];
+  }
+};
+
+const getProductsByCategorySlug = async (categorySlug: string) => {
+  try {
+    const query = `
+      *[_type == 'product' && references(*[_type == "category" && slug.current == $categorySlug]._id)]
+      | order(name asc){
+        ...,
+        "categories": categories[]->{title, "slug": slug.current}
+      }
+    `;
+    const { data } = await sanityFetch({ query, params: { categorySlug } });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching products by category:", error);
+    return [];
+  }
+};
+
 const getDealProducts = async () => {
   try {
     const { data } = await sanityFetch({ query: DEAL_PRODUCTS });
@@ -155,6 +200,9 @@ export {
   getCategories,
   getAllBrands,
   getLatestBlogs,
+  getProductsByVariant,
+  getAllProducts,
+  getProductsByCategorySlug,
   getDealProducts,
   getProductBySlug,
   getBrand,

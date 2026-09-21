@@ -1,32 +1,38 @@
 "use client";
-import { productType } from "@/constants/data";
+import { productTypeItems } from "@/constants/data";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
+
 interface Props {
-  selectedTab: string;
-  onTabSelect: (tab: string) => void;
+  selectedVariant: string;
 }
 
-const HomeTabbar = ({ selectedTab, onTabSelect }: Props) => {
+const HomeTabbar = ({ selectedVariant }: Props) => {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex items-center flex-wrap gap-5 justify-between">
-      <div className="flex items-center gap-1.5 text-sm font-semibold">
-        <div className="flex items-center gap-1.5 md:gap-3">
-          {productType?.map((item) => (
-            <button
-              onClick={() => onTabSelect(item?.title)}
-              key={item?.title}
-              className={`border border-shop_light_green/30 px-4 py-1.5 md:px-6 md:py-2 rounded-full hover:bg-shop_light_green hover:border-shop_light_green hover:text-white hoverEffect ${selectedTab === item?.title ? "bg-shop_light_green text-white border-shop_light_green" : "bg-shop_light_green/10"}`}
-            >
-              {item?.title}
-            </button>
-          ))}
-        </div>
+    <div className="flex items-center flex-wrap gap-4 justify-between">
+      <div className="flex items-center gap-2 flex-wrap">
+        {productTypeItems.map((item) => (
+          <Link
+            href={item.value === productTypeItems[0].value ? "/" : `/?variant=${item.value}`}
+            scroll={false}
+            key={item.key}
+            className={`brand-pill border hoverEffect ${
+              selectedVariant === item.value
+                ? "brand-gradient text-white border-transparent shadow-md shadow-blue-500/20"
+                : "bg-white text-slate-600 border-slate-200 hover:border-brand-blue hover:text-brand-blue"
+            }`}
+          >
+            {t.productType[item.key]}
+          </Link>
+        ))}
       </div>
       <Link
         href={"/shop"}
-        className="border border-darkColor px-4 py-1 rounded-full hover:bg-shop_light_green hover:text-white hover:border-shop_light_green hoverEffect"
+        className="brand-pill bg-brand-navy text-white hover:bg-brand-blue hoverEffect"
       >
-        See all
+        {t.common.seeAll}
       </Link>
     </div>
   );
